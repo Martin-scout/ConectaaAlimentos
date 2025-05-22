@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Asistencia (Acceso por Rol)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+            background-color: #eef2f7;
+            background-image: url('FONDO.png'); 
+            background-size: cover; 
+            background-position: center;
+            background-attachment: fixed; 
+            position: relative; 
+            padding-top: 50px;
+            padding-bottom: 50px; 
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10; 
+        }
+        .logo-container img {
+            width: 80px; 
+            height: auto;
+            border-radius: 50%; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .form-card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            width: 90%; 
+            max-width: 500px;
+            box-sizing: border-box;
+            margin: 20px; 
+            text-align: left;
+        }
+
+        .form-card h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .form-card h3 {
+            font-size: 18px;
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 10px;
+        }
+        label {
+            display: block; 
+            margin-bottom: 20px; 
+            font-size: 14px;
+            color: #666;
+            position: relative; 
+        }
+
+        label span { 
+            position: absolute;
+            top: -10px; 
+            left: 0;
+            font-size: 12px;
+            color: #999;
+            background-color: white;
+            padding: 0 5px;
+            pointer-events: none; 
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%; 
+            padding: 10px 0;
+            border: none; 
+            border-bottom: 1px solid #ccc; 
+            outline: none; 
+            font-size: 16px;
+            color: #333;
+            background-color: transparent; 
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            border-color: #007bff; 
+        }
+ 
+        small {
+            display: block;
+            margin-top: -10px; 
+            margin-bottom: 15px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1); 
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .data-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            max-width: 1000px; 
+            overflow-x: auto; 
+            box-sizing: border-box; 
+            margin: 20px; 
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f7f7f7;
+            font-weight: bold;
+            color: #555;
+        }
+        tr:nth-child(even) {
+            background-color: #fbfbfb;
+        }
+        tr:hover {
+            background-color: #f0f8ff;
+        }
+
+        .delete-btn {
+            background-color: #dc3545; 
+            color: white;
+            padding: 8px 15px;
+            font-size: 13px;
+            border-radius: 5px;
+            box-shadow: none;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+            transform: none; 
+        }
+        .delete-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .clear-btn {
+            background-color: #ffc107; 
+            color: #333;
+            padding: 10px 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .clear-btn:hover {
+            background-color: #e0a800;
+        }
+        #importFile {
+            display: none;
+        }
+        .hidden-field {
+            display: none;
+        }
+        .access-denied-message {
+            background-color: #ffe0b2;
+            color: #e65100; 
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ffb74d;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .options-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center; 
+        }
+        .options-buttons-container button {
+            margin-right: 0;
+        }
+        .thank-you-message {
+            background-color: #d4edda; 
+            color: #155724; 
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <img src="LOGO.png" alt="Logo de la Organización"> </div>
+
+    <div class="form-card">
+        <h2>Registro de Asistencia</h2>
+        <h3>Datos del Asistente</h3>
+        <form id="dataForm">
+            <label>
+                <span>Nombre Completo</span>
+                <input type="text" id="nombre" required>
+            </label>
+
+            <label>
+                <span>Rol</span>
+                <select id="rol" required>
+                    <option value="">Seleccione un rol</option>
+                    <option value="Donador">Donador</option>
+                    <option value="Receptor">Receptor</option>
+                    <option value="Repartidor">Repartidor</option>
+                </select>
+            </label>
+
+            <label id="institucionLabel" class="hidden-field">
+                <span>Nombre de la Institución</span>
+                <input type="text" id="institucion">
+            </label>
+
+            <label id="unidadesDonadasLabel" class="hidden-field">
+                <span>Cantidad de Unidades Donadas</span>
+                <input type="number" id="unidadesDonadas" min="1">
+            </label>
+
+            <label id="estadoDonacionLabel" class="hidden-field">
+                <span>Estado de la Donación</span>
+                <select id="estadoDonacion">
+                    <option value="">Seleccione el estado</option>
+                    <option value="Excelente">Excelente</option>
+                    <option value="Bueno">Bueno</option>
+                    <option value="Regular">Regular</option>
+                </select>
+            </label>
+
+            <label id="unidadesNecesariasLabel" class="hidden-field">
+                <span>Cantidad de Unidades Necesarias</span>
+                <input type="number" id="unidadesNecesarias" min="1">
+            </label>
+
+            <label>
+                <span>Ubicación</span>
+                <input type="text" id="ubicacion" required>
+            </label>
+
+            <label>
+                <span>Tipo de Donación</span>
+                <select id="tipoDonacion" required>
+                    <option value="">Seleccione un tipo</option>
+                    <option value="Comida Fresca">Comida Fresca</option>
+                    <option value="Enlatados">Enlatados</option>
+                    <option value="Alimentos No Perecederos">Alimentos No Perecederos</option>
+                    <option value="Carnes Congeladas">Carnes Congeladas</option>
+                    <option value="N/A">N/A (Para Receptores/Repartidores)</option>
+                </select>
+            </label>
+
+            <label>
+                <span>Número de Teléfono</span>
+                <input type="text" id="numTelefono" required pattern="[0-9]{10}" placeholder="Ej: 1234567890">
+                <small>Formato: 10 dígitos sin espacios ni guiones.</small>
+            </label>
+
+            <label style="margin-top: 15px;">
+                <input type="checkbox" id="esRepartidorAccesoDatos">
+                Soy Repartidor (y puedo ver y gestionar datos)
+            </label><br>
+
+            <button type="submit" style="margin-top: 20px; display: block; width: 100%;">Agregar Dato</button>
+        </form>
+
+        <hr style="margin-top: 30px; margin-bottom: 30px; border-top: 1px solid #eee;">
+
+        <h3>Opciones de Datos</h3>
+        <div id="dataOptionsSection" class="options-buttons-container hidden-field">
+            <button onclick="exportarExcel()">Descargar Excel</button>
+            <input type="file" id="importFile" accept=".xlsx, .xls">
+            <button onclick="document.getElementById('importFile').click();">Subir mis datos</button>
+            <button onclick="mostrarDatos()">Ver Hoja de Datos</button>
+            <button class="clear-btn" onclick="limpiarDatos()">Limpiar Todos los Datos</button>
+        </div>
+        <p id="thankYouMessage" class="thank-you-message hidden-field">¡Gracias! Un repartidor se pondrá en contacto contigo a la brevedad.</p>
+    </div>
+
+    <div class="data-section" id="dataDisplay">
+        </div>
+
+    <script>
+        const datos = []; 
+        let loggedInAsRepartidor = false; 
+        const rolSelect = document.getElementById("rol");
+        const institucionLabel = document.getElementById("institucionLabel");
+        const institucionInput = document.getElementById("institucion");
+        const unidadesDonadasLabel = document.getElementById("unidadesDonadasLabel");
+        const unidadesDonadasInput = document.getElementById("unidadesDonadas");
+        const estadoDonacionLabel = document.getElementById("estadoDonacionLabel");
+        const estadoDonacionSelect = document.getElementById("estadoDonacion");
+        const unidadesNecesariasLabel = document.getElementById("unidadesNecesariasLabel");
+        const unidadesNecesariasInput = document.getElementById("unidadesNecesarias");
+        const esRepartidorAccesoDatosCheckbox = document.getElementById("esRepartidorAccesoDatos");
+
+        const dataOptionsSection = document.getElementById("dataOptionsSection");
+        const thankYouMessage = document.getElementById("thankYouMessage");
+        const dataDisplayDiv = document.getElementById("dataDisplay");
+        function hideAllConditionalFields() {
+            institucionLabel.classList.add("hidden-field");
+            unidadesDonadasLabel.classList.add("hidden-field");
+            estadoDonacionLabel.classList.add("hidden-field");
+            unidadesNecesariasLabel.classList.add("hidden-field");
+
+            institucionInput.removeAttribute("required");
+            unidadesDonadasInput.removeAttribute("required");
+            estadoDonacionSelect.removeAttribute("required");
+            unidadesNecesariasInput.removeAttribute("required");
+
+            institucionInput.value = "";
+            unidadesDonadasInput.value = "";
+            estadoDonacionSelect.value = "";
+            unidadesNecesariasInput.value = "";
+        }
+        rolSelect.addEventListener("change", function() {
+            const selectedRol = this.value;
+            hideAllConditionalFields(); 
+            if (selectedRol === "Receptor") {
+                institucionLabel.classList.remove("hidden-field");
+                institucionInput.setAttribute("required", "required");
+                unidadesNecesariasLabel.classList.remove("hidden-field");
+                unidadesNecesariasInput.setAttribute("required", "required");
+            } else if (selectedRol === "Donador") {
+                unidadesDonadasLabel.classList.remove("hidden-field");
+                unidadesDonadasInput.setAttribute("required", "required");
+                estadoDonacionLabel.classList.remove("hidden-field");
+                estadoDonacionSelect.setAttribute("required", "required");
+            }
+        });
+        esRepartidorAccesoDatosCheckbox.addEventListener("change", function() {
+            if (this.checked && rolSelect.value === "Repartidor") {
+                loggedInAsRepartidor = true;
+                alert("¡Acceso a datos de Repartidor concedido!");
+                updateUIBasedOnRepartidorStatus(); 
+            } else {
+                loggedInAsRepartidor = false;
+                updateUIBasedOnRepartidorStatus(); 
+                if (this.checked || rolSelect.value !== "Repartidor") {
+                    alert("Acceso a datos de Repartidor revocado o rol incorrecto. Desmarca la casilla si no eres repartidor.");
+                }
+            }
+        });
+        function updateUIBasedOnRepartidorStatus() {
+            if (loggedInAsRepartidor) {
+                dataOptionsSection.classList.remove("hidden-field");
+                thankYouMessage.classList.add("hidden-field"); 
+                mostrarDatos();
+            } else {
+                dataOptionsSection.classList.add("hidden-field");
+                thankYouMessage.classList.remove("hidden-field");
+                dataDisplayDiv.innerHTML = '';
+            }
+        }
+
+        document.getElementById("dataForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById("nombre").value;
+            const rol = document.getElementById("rol").value;
+            const ubicacion = document.getElementById("ubicacion").value;
+            const tipoDonacion = document.getElementById("tipoDonacion").value;
+            const numTelefono = document.getElementById("numTelefono").value;
+            const esRepartidorAccesoDatosOnSubmit = document.getElementById("esRepartidorAccesoDatos").checked;
+            const institucion = institucionInput.value;
+            const unidadesDonadas = unidadesDonadasInput.value;
+            const estadoDonacion = estadoDonacionSelect.value;
+            const unidadesNecesarias = unidadesNecesariasInput.value;
+
+            const newEntry = {
+                Nombre: nombre,
+                Rol: rol,
+                Ubicacion: ubicacion,
+                "Tipo de Donación": tipoDonacion,
+                "Teléfono": numTelefono,
+                "Es Repartidor (Puede Eliminar)": (rol === "Repartidor" && esRepartidorAccesoDatosOnSubmit) ? "Sí" : "No"
+            };
+            if (rol === "Receptor") {
+                newEntry["Institución"] = institucion;
+                newEntry["Unidades Necesarias"] = unidadesNecesarias;
+            } else if (rol === "Donador") {
+                newEntry["Unidades Donadas"] = unidadesDonadas;
+                newEntry["Estado de Donación"] = estadoDonacion;
+            }
+
+            datos.push(newEntry);
+            e.target.reset();
+            hideAllConditionalFields(); 
+            rolSelect.value = ""; 
+            esRepartidorAccesoDatosCheckbox.checked = false; 
+            loggedInAsRepartidor = (rol === "Repartidor" && esRepartidorAccesoDatosOnSubmit);
+            updateUIBasedOnRepartidorStatus(); 
+
+            alert("Dato agregado exitosamente.");
+        });
+
+        function exportarExcel() {
+            if (!loggedInAsRepartidor) {
+                alert("Debes estar registrado como Repartidor y tener la casilla marcada para descargar datos.");
+                return;
+            }
+            if (datos.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            const worksheet = XLSX.utils.json_to_sheet(datos);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Donaciones");
+
+            XLSX.writeFile(workbook, "base_de_datos_donaciones.xlsx");
+        }
+
+        document.getElementById("importFile").addEventListener("change", function (e) {
+            if (!loggedInAsRepartidor) {
+                alert("Debes estar registrado como Repartidor y tener la casilla marcada para subir datos.");
+                this.value = ''; 
+                return;
+            }
+
+            const file = e.target.files[0];
+            if (!file) {
+                return;
+            }
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                datos.splice(0, datos.length, ...jsonData);
+                alert("Datos importados exitosamente!");
+                mostrarDatos(); 
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function borrarDato(index) {
+            if (loggedInAsRepartidor) {
+                if (confirm("¿Estás seguro de que quieres borrar este dato?")) {
+                    datos.splice(index, 1);
+                    mostrarDatos();
+                    alert("Dato borrado.");
+                }
+            } else {
+                alert("Debes estar registrado como Repartidor y tener la casilla marcada para borrar datos.");
+            }
+        }
+
+        function limpiarDatos() {
+            if (!loggedInAsRepartidor) {
+                alert("Debes estar registrado como Repartidor y tener la casilla marcada para limpiar todos los datos.");
+                return;
+            }
+            if (confirm("¿Estás seguro de que quieres borrar TODOS los datos? Esta acción no se puede deshacer.")) {
+                datos.length = 0;
+                mostrarDatos();
+                alert("Todos los datos han sido borrados.");
+            }
+        }
+
+        function mostrarDatos() {
+            dataDisplayDiv.innerHTML = ''; 
+
+            if (!loggedInAsRepartidor) {
+                return;
+            }
+
+            if (datos.length === 0) {
+                dataDisplayDiv.innerHTML = "<p>No hay datos para mostrar.</p>";
+                return;
+            }
+
+            const table = document.createElement("table");
+            const thead = document.createElement("thead");
+            const tbody = document.createElement("tbody");
+            let allKeys = new Set();
+            datos.forEach(item => {
+                Object.keys(item).forEach(key => allKeys.add(key));
+            });
+            const headers = Array.from(allKeys);
+            const headerRow = document.createElement("tr");
+            headers.forEach(key => {
+                const th = document.createElement("th");
+                th.textContent = key;
+                headerRow.appendChild(th);
+            });
+
+            const thAction = document.createElement("th");
+            thAction.textContent = "Acción";
+            headerRow.appendChild(thAction);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            datos.forEach((rowData, index) => {
+                const tr = document.createElement("tr");
+                headers.forEach(key => {
+                    const td = document.createElement("td");
+                    td.textContent = rowData[key] !== undefined ? rowData[key] : '';
+                    tr.appendChild(td);
+                });
+
+                const tdAction = document.createElement("td");
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Borrar";
+                deleteButton.classList.add("delete-btn");
+                if (loggedInAsRepartidor) {
+                    deleteButton.onclick = () => borrarDato(index);
+                    deleteButton.disabled = false;
+                } else {
+                    deleteButton.disabled = true;
+                    deleteButton.title = "Debes ser Repartidor y tener la casilla marcada para borrar datos.";
+                }
+
+                tdAction.appendChild(deleteButton);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            dataDisplayDiv.appendChild(table);
+        }
+        hideAllConditionalFields();
+        updateUIBasedOnRepartidorStatus();
+
+    </script>
+</body>
+</html>
